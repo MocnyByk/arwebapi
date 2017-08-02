@@ -12,7 +12,8 @@ var DocumentSchema  = new Schema({
     createMember: { type: String, required: true },
     height: Number,
     width: Number,
-    folder: String
+    folder: String,
+    displayOrder: Number
 });
 
 DocumentSchema.on('init', function(model) {

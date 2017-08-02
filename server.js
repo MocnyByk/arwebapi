@@ -50,6 +50,7 @@ app.use('/*', function(req, res, next) {
 */
 app.use('/', require('./app/routes/route-index'));
 app.use('/document', require('./app/routes/route-document'));
+app.use('/member', require('./app/routes/route-member'));
 
 // START THE SERVER
 // =============================================================================
