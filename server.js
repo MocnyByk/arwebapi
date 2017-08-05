@@ -51,6 +51,9 @@ app.use('/*', function(req, res, next) {
 app.use('/', require('./app/routes/route-index'));
 app.use('/document', require('./app/routes/route-document'));
 app.use('/member', require('./app/routes/route-member'));
+app.use('/inquiry', require('./app/routes/route-inquiry'));
+app.use('/content', require('./app/routes/route-content'));
+app.use('/visitdata', require('./app/routes/route-visitdata'));
 
 // START THE SERVER
 // =============================================================================

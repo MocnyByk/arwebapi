@@ -18,23 +18,23 @@ var helper = {
         if(req.body.title !== undefined)
             document.title = req.body.title;
         if(req.body.description !== undefined)
-            document.description = req.body.description
+            document.description = req.body.description;
         if(req.body.docType !== undefined)
-            document.docType = req.body.docType
+            document.docType = req.body.docType;
         if(req.body.mimeType !== undefined)
-            document.mimeType = req.body.mimeType
+            document.mimeType = req.body.mimeType;
         if(req.body.docUrl !== undefined)
-            document.docUrl = req.body.docUrl
+            document.docUrl = req.body.docUrl;
         if(req.body.thumbnailUrl !== undefined)
-            document.thumbnailUrl = req.body.thumbnailUrl
+            document.thumbnailUrl = req.body.thumbnailUrl;
         //document.createDate = N/A, doesn't change.
         //document.createMember = N/A, Part of authorization
         if(req.body.height !== undefined)
-            document.height = req.body.height
+            document.height = req.body.height;
         if(req.body.width !== undefined)
-            document.width = req.body.width
+            document.width = req.body.width;
         if(req.body.folder !== undefined)
-            document.folder = req.body.folder
+            document.folder = req.body.folder;
         if(req.body.displayOrder !== undefined)
             document.displayOrder = req.body.displayOrder;
 
@@ -42,24 +42,26 @@ var helper = {
     }
 };
 
-// router.get('/test', function(req, res){
-//     res.json({ message: 'We hit the test route.' });
-// });
-
 var router      = express.Router()
+
     // GET /
     // REQUIRE AUTH
-    // RETURN all documents for the authorized user
+    // RETURN all documents
     .get('/', function(req, res){
-        var member = auth.authenticate(req);
-        if(!member){
-            auth.sendUnauthorized(res);
-            return;
+
+        var qFolder = req.query.folder;
+        var searchObj = {};
+
+        if(qFolder){
+            searchObj.folder = qFolder;
         }
 
-        Document.find(function(err, documents){
+        Document.find(searchObj, function(err, documents){
             if(err){
                 errorHandler.handleError(err, res);
+            }
+            else if(!documents){
+                auth.sendNotFound(res);
             }
             else{
                 res.json(documents);
@@ -82,42 +84,17 @@ var router      = express.Router()
         });
     })
 
-    // GET
-    // RETURN all documents under the designated folder
-    .get('/folder/:folder_path_base64', function(req, res){
-        var folderPathBase64 = req.params.folder_path_base64;
-        if(!folderPathBase64){
-            res.json(logger.buildMessageJson('No folder given.'));
-            return;
-        }
-
-        var buffer = new Buffer(folderPathBase64, 'base64');
-        var folderPathStr = buffer.toString();
-
-        Document.find({folder: folderPathStr}, function(err, documents){
-            if(err){
-                errorHandler.handleError(err, res);
-            }
-            else if(!documents){
-                auth.sendNotFound(res);
-            }
-            else{
-                res.json(document);
-            }
-        });
-    })
-
     // GET /:document_id 
     // RETURN the document of the given id
     .get('/:document_id', function(req, res){
         var docId = req.params.document_id;
         if(!docId){
-            res.json(logger.buildMessageJson("No document id given."));
+            auth.sendBadRequest('No document id given.');
             return;
         }
 
         if(!auth.isValidId(docId)){
-            res.json(logger.buildMessageJson("Invalid document id given."));
+            auth.sendBadRequest('Invalid document id given.');
             return;
         }
 
@@ -161,12 +138,12 @@ var router      = express.Router()
     .put('/:document_id',function(req, res){
         var docId = req.params.document_id;
         if(!docId){
-            res.json(logger.buildMessageJson("No document id given."));
+            auth.sendBadRequest('No document id given.');
             return;
         }
 
         if(!auth.isValidId(docId)){
-            res.json(logger.buildMessageJson("Invalid document id given."));
+            auth.sendBadRequest('Invalid document id given.');
             return;
         }
 
@@ -180,6 +157,9 @@ var router      = express.Router()
             if(err){
                 errorHandler.handleError(err, res);
             }
+            else if(!document){
+                auth.sendNotFound(res);
+            }
             else{
                 var docToSave = helper.getDocument(req, document);
                 document.__v += 1;
@@ -187,9 +167,6 @@ var router      = express.Router()
                 docToSave.save(function(err){
                     if (err){
                         errorHandler.handleError(err, res);
-                    }
-                    else if(!document){
-                        auth.sendNotFound(res);
                     }
                     else
                     {
@@ -205,12 +182,12 @@ var router      = express.Router()
     .delete('/:document_id',function(req, res){
         var docId = req.params.document_id;
         if(!docId){
-            res.json(logger.buildMessageJson("No document id given."));
+            auth.sendBadRequest('No document id given.');
             return;
         }
 
         if(!auth.isValidId(docId)){
-            res.json(logger.buildMessageJson("Invalid document id given."));
+            auth.sendBadRequest('Invalid document id given.');
             return;
         }
 
