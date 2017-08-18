@@ -10,7 +10,7 @@ var helper = {
         if(!req || !req.body)
             return undefined;
 
-        if(inquiry === undefined){
+        if(!inquiry){
             inquiry = new Inqiury();
         }
         

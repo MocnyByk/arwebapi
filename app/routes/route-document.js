@@ -10,7 +10,7 @@ var helper = {
         if(!req || !req.body)
             return undefined;
 
-        if(document === undefined){
+        if(!document){
             document = new Document();
         }
         

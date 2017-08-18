@@ -10,7 +10,7 @@ var helper = {
         if(!req || !req.body)
             return undefined;
 
-        if(content === undefined){
+        if(!content){
             content = new Inqiury();
         }
         
@@ -88,7 +88,8 @@ var router = express.Router()
             }
             else{
                 var inqToSave = helper.getContent(req, content);
-                content.__v += 1;
+                inqToSave.__v += 1;
+                inqToSave.markModified('data');
 
                 inqToSave.save(function(err){
                     if (err){
@@ -99,6 +100,27 @@ var router = express.Router()
                         res.json({_id: content._id});
                     }
                 });
+            }
+        });
+    })
+    
+    // POST
+    // REQUIRE AUTH
+    .post('/',function(req, res){
+        var member = auth.authenticate(req);
+        if(!member){
+            auth.sendUnauthorized(res);
+            return;
+        }
+
+        var content = helper.getContent(req);
+
+        content.save(function(err) {
+            if (err){
+                errorHandler.handleError(err, res);
+            }
+            else{
+                res.json({_id: content._id});
             }
         });
     });

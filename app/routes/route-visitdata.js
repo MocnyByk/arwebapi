@@ -11,7 +11,7 @@ var helper = {
         if(!req || !req.body)
             return undefined;
 
-        if(visitData === undefined){
+        if(!visitData){
             visitData = new Inqiury();
         }
         
